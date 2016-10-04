@@ -24,9 +24,15 @@ class QuadraticCost:
 
 
 def stochastic_gradient_descent(network, training_data, epochs, mini_batch_size,
-    learning_rate, test_data=None, cost=CrossEntropyCost):
+    learning_rate, cost=CrossEntropyCost, evaluation_data=None,
+    monitor_evaluation_accuracy=False,
+    monitor_training_accuracy=False):
 
-    if test_data: num_test_data = len(test_data)
+    if evaluation_data: num_evaluation_data = len(evaluation_data)
+
+    n = len(training_data)
+    evaluation_accuracy = []
+    training_accuracy = []
 
     for epoch in xrange(epochs):
         random.shuffle(training_data)
@@ -35,11 +41,30 @@ def stochastic_gradient_descent(network, training_data, epochs, mini_batch_size,
         for mini_batch in mini_batches:
             update_weights_for_batch(network, mini_batch, learning_rate, cost)
 
-        if test_data:
-            print "Epoch {0}: {1} / {2}".format(
-                epoch, network.evaluate(test_data), num_test_data)
-        else:
-            print "Epock {0} complete".format(epoch)
+        if monitor_training_accuracy:
+            training_accuracy_for_epoch = accuracy(network, training_data, True)
+            training_accuracy.append(training_accuracy_for_epoch)
+            print "Accuracy on training data: {} / {}".format(
+                training_accuracy_for_epoch, n)
+
+        if monitor_evaluation_accuracy:
+            evaluation_accuracy_for_epoch = accuracy(network, evaluation_data, False)
+            evaluation_accuracy.append(evaluation_accuracy_for_epoch)
+            print "Accuracy on evaluation data: {} / {}".format(
+                evaluation_accuracy_for_epoch, num_evaluation_data)
+
+        print "Epoch {0} complete".format(epoch)
+
+
+def accuracy(network, data, is_training):
+    if is_training:
+        results = [(np.argmax(network.feedforward(x)), np.argmax(y))
+                   for (x, y) in data]
+    else:
+        results = [(np.argmax(network.feedforward(x)), y)
+                    for (x, y) in data]
+    return sum(int(x == y) for (x, y) in results)
+
 
 def update_weights_for_batch(network, mini_batch, learning_rate, cost):
     bias_diffs = [np.zeros(b.shape) for b in network.biases]
