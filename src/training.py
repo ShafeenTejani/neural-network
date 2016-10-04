@@ -2,6 +2,16 @@ import numpy as np
 import random
 import utils
 
+class CrossEntropyCost:
+
+    @staticmethod
+    def cost(actual, target):
+        return np.sum(np.nan_to_num(-target*np.log(actual)-(1-target)*np.log(1-actual)))
+
+    @staticmethod
+    def output_error(weighted_sum_of_inputs, activations, targets):
+        return (activations - targets)
+
 class QuadraticCost:
 
     @staticmethod
@@ -9,8 +19,8 @@ class QuadraticCost:
         return 0.5*np.linalg.norm(actual-target)**2
 
     @staticmethod
-    def output_error(weighted_sum_of_inputs, activations, expected):
-        return (activations - expected) * utils.sigmoid_prime(weighted_sum_of_inputs)
+    def output_error(weighted_sum_of_inputs, activations, targets):
+        return (activations - targets) * utils.sigmoid_prime(weighted_sum_of_inputs)
 
 
 def stochastic_gradient_descent(network, training_data, epochs, mini_batch_size,
