@@ -24,7 +24,10 @@ class QuadraticCost:
 
 
 def stochastic_gradient_descent(network, training_data, epochs, mini_batch_size,
-    learning_rate, cost=CrossEntropyCost, evaluation_data=None,
+    learning_rate,
+    l2_regularisation=0.0,
+    cost=CrossEntropyCost,
+    evaluation_data=None,
     monitor_evaluation_accuracy=False,
     monitor_training_accuracy=False):
 
@@ -33,13 +36,14 @@ def stochastic_gradient_descent(network, training_data, epochs, mini_batch_size,
     n = len(training_data)
     evaluation_accuracy = []
     training_accuracy = []
+    weighted_l2 = l2_regularisation / len(training_data)
 
     for epoch in xrange(epochs):
         random.shuffle(training_data)
         mini_batches = get_mini_batches(training_data, mini_batch_size)
 
         for mini_batch in mini_batches:
-            update_weights_for_batch(network, mini_batch, learning_rate, cost)
+            update_weights_for_batch(network, mini_batch, learning_rate, cost, weighted_l2)
 
         if monitor_training_accuracy:
             training_accuracy_for_epoch = accuracy(network, training_data, True)
@@ -66,7 +70,7 @@ def accuracy(network, data, is_training):
     return sum(int(x == y) for (x, y) in results)
 
 
-def update_weights_for_batch(network, mini_batch, learning_rate, cost):
+def update_weights_for_batch(network, mini_batch, learning_rate, cost, l2_regularisation):
     bias_diffs = [np.zeros(b.shape) for b in network.biases]
     weight_diffs = [np.zeros(w.shape) for w in network.weights]
 
@@ -75,12 +79,12 @@ def update_weights_for_batch(network, mini_batch, learning_rate, cost):
         bias_diffs = [bd + dbd for bd, dbd in zip(bias_diffs, delta_bias_diffs)]
         weight_diffs = [wd + dwd for wd, dwd in zip(weight_diffs, delta_weight_diffs)]
 
-    update_weights(network, weight_diffs, learning_rate / len(mini_batch))
+    update_weights(network, weight_diffs, learning_rate / len(mini_batch), l2_regularisation)
     update_biases(network, bias_diffs, learning_rate / len(mini_batch))
 
 
-def update_weights(network, weight_differentials, learning_rate):
-    network.weights = [w - (learning_rate)*dw
+def update_weights(network, weight_differentials, learning_rate, l2_regularisation):
+    network.weights = [(1 - learning_rate*l2_regularisation)*w - (learning_rate)*dw
         for w, dw in zip(network.weights, weight_differentials)]
 
 def update_biases(network, bias_differentials, learning_rate):
