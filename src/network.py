@@ -9,14 +9,14 @@ class NeuralNetwork:
     def __init__(self, layer_sizes):
         self.layer_sizes = layer_sizes
         self.num_layers = len(layer_sizes)
-        [self.weights, self.biases] = self._initialise_neurons(layer_sizes)
+        [self.weights, self.biases] = self._initialise_weights(layer_sizes)
 
-    def _initialise_neurons(self, layer_sizes):
+    def _initialise_weights(self, layer_sizes):
         weights = [0] * (len(layer_sizes) - 1)
         biases = [0] * (len(layer_sizes) - 1)
-        for i, layer in enumerate(layer_sizes[:-1]):
-            weights[i] = np.random.randn(layer_sizes[i+1], layer_sizes[i])
-            biases[i] = np.random.randn(layer_sizes[i+1], 1)
+        for i, layer in enumerate(layer_sizes[1:]):
+            weights[i] = np.random.randn(layer, layer_sizes[i])/np.sqrt(layer_sizes[i])
+            biases[i] = np.random.randn(layer, 1)
         return [weights, biases]
 
     def feedforward(self, input):
