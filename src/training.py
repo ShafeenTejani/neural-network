@@ -24,7 +24,7 @@ class QuadraticCost:
 
 
 def stochastic_gradient_descent(network, training_data, epochs, mini_batch_size,
-    learning_rate, test_data=None, cost=QuadraticCost):
+    learning_rate, test_data=None, cost=CrossEntropyCost):
 
     if test_data: num_test_data = len(test_data)
 
