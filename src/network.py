@@ -46,6 +46,24 @@ class NeuralNetwork:
             activations.append(activation)
         return (activations, neuron_outputs)
 
+    def save(self, filename):
+        data = {"layer_sizes": self.layer_sizes,
+                "weights": [w.tolist() for w in self.weights],
+                "biases": [b.tolist() for b in self.biases]}
+        f = open(filename, "w")
+        json.dump(data, f)
+        f.close()
+
+    @staticmethod
+    def load(filename):
+        f = open(filename, "r")
+        data = json.load(f)
+        f.close()
+        network = NeuralNetwork(data["layer_sizes"])
+        network.weights = [np.array(w) for w in data["weights"]]
+        network.biases = [np.array(b) for b in data["biases"]]
+        return network
+
     def as_dict(self):
         dictionary = {}
         for index, (layer_weights, layer_biases) in enumerate(zip(self.weights, self.biases)):
